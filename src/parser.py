@@ -19,14 +19,44 @@ def parse_config(
     strict: bool = True,
     allow_env: bool = False,
     context: dict[str, str] | None = None,
+    include_files: bool = False,
+    depth: int = 0,
 ) -> dict[str, str]:
-    """Parse a config file. Intentionally tangled — should trigger the bot."""
+    """Parse a config file. Even more tangled than before."""
     result: dict[str, str] = {}
     context = context or {}
+    if depth > 10:
+        raise RecursionError("include depth exceeded")
     for i, raw in enumerate(lines):
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
+        if line.startswith("@include ") and include_files:
+            included = line[len("@include "):].strip()
+            try:
+                with open(included) as fh:
+                    sub_lines = fh.readlines()
+                sub_result = parse_config(
+                    sub_lines,
+                    strict=strict,
+                    allow_env=allow_env,
+                    context=context,
+                    include_files=include_files,
+                    depth=depth + 1,
+                )
+                for sub_key, sub_value in sub_result.items():
+                    if sub_key in result:
+                        if strict:
+                            raise ValueError(f"line {i}: duplicate {sub_key!r} from {included}")
+                        else:
+                            continue
+                    result[sub_key] = sub_value
+                continue
+            except FileNotFoundError:
+                if strict:
+                    raise
+                else:
+                    continue
         if "=" not in line:
             if strict:
                 raise ValueError(f"line {i}: no '=' in {line!r}")
