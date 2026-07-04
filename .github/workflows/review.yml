@@ -14,3 +14,8 @@ jobs:
     with:
       min_score: 0.95
       max_comments: 5
+    secrets:
+      # Optional. If set on this repo, Claude Haiku rewrites each flag's
+      # reason into reviewer voice. Falls back silently to templated
+      # reasons when unset or on API failure.
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
