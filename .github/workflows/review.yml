@@ -11,12 +11,8 @@ permissions:
 jobs:
   review:
     uses: Arpan-206/mr-spiky/.github/workflows/mr-spiky-review.yml@main
-    with:
-      # 0.90 gives room for structural-only signal (naming, complexity,
-      # hidden_calls) to comment. 0.95 was previously tuned for the
-      # older feature space and left most junior gnarl silent.
-      min_score: 0.90
-      max_comments: 5
+    # min_score defaults to 0.90 (same as the analyze flag threshold);
+    # max_comments defaults to 5. Both left as defaults here.
     secrets:
       # Optional. If set on this repo, Claude Haiku rewrites each flag's
       # reason into reviewer voice. Falls back silently to templated
